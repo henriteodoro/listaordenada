@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Organizador de Lista</title>
+  <title>Lista Ordenada</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,10 +20,16 @@
 
     .container {
       display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+      justify-content: center;
       padding: 20px;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: row;
       gap: 20px;
+      max-width: 1000px;
+      width: 100%;
     }
 
     textarea {
@@ -50,8 +56,8 @@
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 16px;
+      padding: 12px 20px;
+      font-size: 20px;
       background-color: #0073e6;
       color: white;
       border: none;
@@ -63,42 +69,37 @@
     button:hover {
       background-color: #005bb5;
     }
-
-    footer {
-      text-align: center;
-      font-size: 14px;
-      color: #777;
-      margin-top: 30px;
-    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Organizador de Lista Personalizado</h1>
-    <p>Remove palavras como "pacote", reordena números e ordena alfabeticamente</p>
+    <h1>Lista Ordenada</h1>
+    <p>Reordena números e ordena alfabeticamente</p>
   </header>
 
   <div class="container">
-    <div class="col">
-      <label for="entrada"><strong>Texto de Entrada</strong></label>
-      <textarea id="entrada" placeholder="Ex:&#10;2 pacotes de leite&#10;1 pct de café&#10;8 queijo"></textarea>
-    </div>
+    <div class="content">
+      <div class="col">
+        <label for="entrada"><strong>Texto de Entrada</strong></label>
+        <textarea id="entrada" placeholder="Ex:&#10;2 pacotes de leite&#10;1 pct de café&#10;8 queijo"></textarea>
+      </div>
 
-    <div class="center">
-      <button onclick="processar()">Organizar →</button>
-    </div>
+      <div class="center">
+        <button onclick="processar()">→</button>
+      </div>
 
-    <div class="col">
-      <label for="saida"><strong>Resultado Ordenado (<span id="linhaQtd">0</span> linhas)</strong></label>
-      <textarea id="saida" readonly></textarea>
+      <div class="col">
+        <label for="saida"><strong>Resultado Ordenado (<span id="linhaQtd">0</span> linhas)</strong></label>
+        <textarea id="saida" readonly></textarea>
+      </div>
     </div>
   </div>
 
-  <footer>
-    Criado por você • Inspirado em invertexto.com
-  </footer>
-
   <script>
+    function removerAcentos(str) {
+      return str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    }
+
     function processar() {
       const texto = document.getElementById('entrada').value.trim();
       if (!texto) {
@@ -107,12 +108,15 @@
         return;
       }
 
-      const linhas = texto.split('\n');
+      const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
       const removiveis = ['pct', 'pcts', 'pacote', 'pacotes', 'pacote de', 'pct de', 'pcts de'];
 
       const processadas = linhas.map(linhaOriginal => {
         let linha = linhaOriginal.toLowerCase().trim();
+
+        // Correção de palavras específicas
+        linha = linha.replace(/\bkibe\b/g, 'quibe');
 
         // Remove palavras proibidas
         removiveis.forEach(palavra => {
@@ -131,7 +135,10 @@
         return linha;
       });
 
-      const ordenadas = processadas.sort((a, b) => a.localeCompare(b));
+      const ordenadas = processadas.sort((a, b) => {
+        return removerAcentos(a).localeCompare(removerAcentos(b));
+      });
+
       document.getElementById('saida').value = ordenadas.join('\n');
       document.getElementById('linhaQtd').textContent = ordenadas.length;
     }
