@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Organizador de Lista</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f0f2f5;
+    }
+
+    header {
+      background-color: #0073e6;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 400px;
+      padding: 15px;
+      font-size: 16px;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #005bb5;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Organizador de Lista Personalizado</h1>
+    <p>Remove palavras como "pacote", reordena números e ordena alfabeticamente</p>
+  </header>
+
+  <div class="container">
+    <div class="col">
+      <label for="entrada"><strong>Texto de Entrada</strong></label>
+      <textarea id="entrada" placeholder="Ex:&#10;2 pacotes de leite&#10;1 pct de café&#10;8 queijo"></textarea>
+    </div>
+
+    <div class="center">
+      <button onclick="processar()">Organizar →</button>
+    </div>
+
+    <div class="col">
+      <label for="saida"><strong>Resultado Ordenado (<span id="linhaQtd">0</span> linhas)</strong></label>
+      <textarea id="saida" readonly></textarea>
+    </div>
+  </div>
+
+  <footer>
+    Criado por você • Inspirado em invertexto.com
+  </footer>
+
+  <script>
+    function processar() {
+      const texto = document.getElementById('entrada').value.trim();
+      if (!texto) {
+        document.getElementById('saida').value = '';
+        document.getElementById('linhaQtd').textContent = '0';
+        return;
+      }
+
+      const linhas = texto.split('\n');
+
+      const removiveis = ['pct', 'pcts', 'pacote', 'pacotes', 'pacote de', 'pct de', 'pcts de'];
+
+      const processadas = linhas.map(linhaOriginal => {
+        let linha = linhaOriginal.toLowerCase().trim();
+
+        // Remove palavras proibidas
+        removiveis.forEach(palavra => {
+          const regex = new RegExp('\\b' + palavra + '\\b', 'gi');
+          linha = linha.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
+        });
+
+        const partes = linha.split(' ');
+        const primeiro = partes[0];
+        const resto = partes.slice(1).join(' ');
+
+        if (!isNaN(primeiro)) {
+          return `${resto} ${primeiro}`.trim();
+        }
+
+        return linha;
+      });
+
+      const ordenadas = processadas.sort((a, b) => a.localeCompare(b));
+      document.getElementById('saida').value = ordenadas.join('\n');
+      document.getElementById('linhaQtd').textContent = ordenadas.length;
+    }
+  </script>
+</body>
+</html>
