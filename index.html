@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -40,12 +41,6 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       box-sizing: border-box;
-      color: #757575;
-    }
-
-    textarea:focus {
-      border: 1px solid #3399ff;
-      outline: none;
     }
 
     .col {
@@ -62,18 +57,17 @@
 
     button {
       padding: 12px 20px;
-      font-size: 24px;
+      font-size: 20px;
       background-color: #0073e6;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s, transform 0.2s ease;
+      transition: background 0.3s;
     }
 
     button:hover {
       background-color: #005bb5;
-      transform: scale(1.05);
     }
   </style>
 </head>
@@ -86,16 +80,16 @@
   <div class="container">
     <div class="content">
       <div class="col">
-        <label for="entrada"><strong style="color: #757575;">Texto de Entrada</strong></label>
-        <textarea id="entrada" placeholder=""></textarea>
+        <label for="entrada"><strong>Texto de Entrada</strong></label>
+        <textarea id="entrada" placeholder="Ex:&#10;2 pacotes de leite&#10;1 pct de café&#10;8 queijo"></textarea>
       </div>
 
       <div class="center">
-        <button onclick="processar()">⮞</button>
+        <button onclick="processar()">→</button>
       </div>
 
       <div class="col">
-        <label for="saida"><strong style="color: #757575;">Resultado (<span id="linhaQtd">0</span> linha)</strong></label>
+        <label for="saida"><strong>Resultado Ordenado (<span id="linhaQtd">0</span> linhas)</strong></label>
         <textarea id="saida" readonly></textarea>
       </div>
     </div>
@@ -103,32 +97,31 @@
 
   <script>
     function removerAcentos(str) {
-      return str.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+      return str.normalize("NFD").replace(/[̀-ͯ]/g, "");
     }
 
     function processar() {
-      const entrada = document.getElementById('entrada');
-      const saida = document.getElementById('saida');
-      const contador = document.getElementById('linhaQtd');
-
-      const texto = entrada.value.trim();
+      const texto = document.getElementById('entrada').value.trim();
       if (!texto) {
-        saida.value = '';
-        contador.textContent = '0';
-        atualizarRotulo(0);
+        document.getElementById('saida').value = '';
+        document.getElementById('linhaQtd').textContent = '0';
         return;
       }
 
-      const linhas = texto.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
+      const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
       const removiveis = ['pct', 'pcts', 'pacote', 'pacotes', 'pacote de', 'pct de', 'pcts de'];
 
       const processadas = linhas.map(linhaOriginal => {
         let linha = linhaOriginal.toLowerCase().trim();
-        linha = linha.replace(/\\bkibe\\b/g, 'quibe');
 
+        // Correção de palavras específicas
+        linha = linha.replace(/\bkibe\b/g, 'quibe');
+
+        // Remove palavras proibidas
         removiveis.forEach(palavra => {
-          const regex = new RegExp('\\\\b' + palavra + '\\\\b', 'gi');
-          linha = linha.replace(regex, '').replace(/\\s{2,}/g, ' ').trim();
+          const regex = new RegExp('\\b' + palavra + '\\b', 'gi');
+          linha = linha.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
         });
 
         const partes = linha.split(' ');
@@ -138,6 +131,7 @@
         if (!isNaN(primeiro)) {
           return `${resto} ${primeiro}`.trim();
         }
+
         return linha;
       });
 
@@ -145,14 +139,8 @@
         return removerAcentos(a).localeCompare(removerAcentos(b));
       });
 
-      saida.value = ordenadas.join('\\n');
-      contador.textContent = ordenadas.length;
-      atualizarRotulo(ordenadas.length);
-    }
-
-    function atualizarRotulo(qtd) {
-      const rotulo = document.querySelector('label[for="saida"] strong');
-      rotulo.innerHTML = `Resultado (<span id="linhaQtd">${qtd}</span> ${qtd === 1 ? 'linha' : 'linhas'})`;
+      document.getElementById('saida').value = ordenadas.join('\n');
+      document.getElementById('linhaQtd').textContent = ordenadas.length;
     }
   </script>
 </body>
